@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burger House - As Melhores Hamburguers da Cidade</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+          url('https://images.unsplash.com/photo-1586816001966-79b736744398?q=80&w=1920')
+            center/cover;
+        height: 100vh;
+      }
+      .menu-item {
+        transition: transform 0.3s ease;
+      }
+      .menu-item:hover {
+        transform: translateY(-10px);
+      }
+      .swiper {
+        width: 100%;
+        padding: 20px 0;
+        overflow: visible;
+      }
+      .swiper-slide {
+        height: auto;
+        width: 100%;
+        max-width: 400px;
+      }
+      .swiper-slide img {
+        display: block;
+        width: 100%;
+        border-radius: 15px;
+      }
+      .floating-whatsapp {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+      .menu-mobile-button {
+        display: none;
+      }
+      @media (max-width: 768px) {
+        .menu-mobile-button {
+          display: block;
+        }
+      }
+      .promo-card {
+        position: relative;
+        overflow: hidden;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .promo-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      }
+      .promo-card img {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+      }
+      .promo-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #ef4444;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.875rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+      }
+      .promo-content {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .promo-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #1f2937;
+      }
+      .promo-list {
+        flex: 1;
+        margin-bottom: 1rem;
+      }
+      .promo-description {
+        position: relative;
+        padding-left: 20px;
+        margin: 8px 0;
+        font-size: 0.9375rem;
+        color: #4b5563;
+      }
+      .promo-description:before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: #ef4444;
+      }
+      .promo-footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+      }
+      .promo-price-old {
+        text-decoration: line-through;
+        color: #9ca3af;
+        font-size: 1rem;
+      }
+      .promo-price-new {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.25rem;
+        box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+      }
+      #map {
+        height: 400px !important;
+        width: 100% !important;
+        border-radius: 0.5rem;
+        z-index: 1;
+        position: relative;
+      }
+      .map-container {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #f0f0f0;
+      }
+      .leaflet-container {
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1;
+      }
+      .delivery-radius-info {
+        background: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        border: 1px solid #e5e7eb;
+      }
+      .delivery-radius-info p {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #4b5563;
+      }
+      .radius-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .radius-dot.free {
+        background: #22c55e;
+      }
+      .radius-dot.paid {
+        background: #eab308;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white border-gray-200 dark:bg-gray-900 fixed w-full z-50">
+      <div
+        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
+      >
+        <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <span
+            class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+            >Burger House</span
+          >
+        </a>
+        <div class="flex md:order-2">
+          <button
+            type="button"
+            class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2 text-center"
+          >
+            Peça Agora
+          </button>
+        </div>
+        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+          <ul
+            class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
+          >
+            <li>
+              <a
+                href="#home"
+                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-red-700 md:p-0 dark:text-white md:dark:hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >Início</a
+              >
+            </li>
+            <li>
+              <a
+                href="#menu"
+                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-red-700 md:p-0 dark:text-white md:dark:hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >Menu</a
+              >
+            </li>
+            <li>
+              <a
+                href="#sobre"
+                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-red-700 md:p-0 dark:text-white md:dark:hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >Sobre</a
+              >
+            </li>
+            <li>
+              <a
+                href="#contato"
+                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-red-700 md:p-0 dark:text-white md:dark:hover:text-red-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >Contato</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section
+      id="home"
+      class="hero-section flex items-center justify-center text-center text-white"
+    >
+      <div data-aos="fade-up">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4">Burger House</h1>
+        <p class="text-xl md:text-2xl mb-8">
+          Os melhores hamburgueres artesanais da cidade
+        </p>
+        <div class="flex justify-center gap-4">
+          <button
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105"
+          >
+            Ver Cardápio
+          </button>
+          <button
+            onclick="scrollToSection('delivery')"
+            class="bg-white text-red-600 hover:bg-red-100 font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105"
+          >
+            Delivery
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Promoções Section -->
+    <section class="py-16 bg-red-50">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-12" data-aos="fade-up">
+          Promoções da Semana
+        </h2>
+        <div class="swiper promoSwiper" data-aos="fade-up">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide">
+              <div class="promo-card">
+                <div class="promo-badge">MAIS VENDIDO</div>
+                <img
+                  src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?q=80&w=800"
+                  alt="Combo Família"
+                />
+                <div class="promo-content">
+                  <h3 class="promo-title">Combo Família</h3>
+                  <div class="promo-list">
+                    <p class="promo-description">4 Hamburgueres Artesanais</p>
+                    <p class="promo-description">4 Bebidas à Escolha</p>
+                    <p class="promo-description">2 Porções de Batata Grande</p>
+                    <p class="promo-description">Molhos Especiais</p>
+                  </div>
+                  <div class="promo-footer">
+                    <span class="promo-price-old">R$ 129,90</span>
+                    <span class="promo-price-new">R$ 89,90</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="swiper-slide">
+              <div class="promo-card">
+                <div class="promo-badge">NOVO</div>
+                <img
+                  src="https://images.unsplash.com/photo-1551782450-17144efb9c50?q=80&w=800"
+                  alt="Duplo Cheese"
+                />
+                <div class="promo-content">
+                  <h3 class="promo-title">Duplo Cheese</h3>
+                  <div class="promo-list">
+                    <p class="promo-description">Hamburguer Duplo 200g</p>
+                    <p class="promo-description">Queijo Cheddar Extra</p>
+                    <p class="promo-description">Batata Frita Média</p>
+                    <p class="promo-description">Bebida 400ml</p>
+                  </div>
+                  <div class="promo-footer">
+                    <span class="promo-price-old">R$ 44,90</span>
+                    <span class="promo-price-new">R$ 29,90</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="swiper-slide">
+              <div class="promo-card">
+                <div class="promo-badge">OFERTA</div>
+                <img
+                  src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800"
+                  alt="Combo Amigos"
+                />
+                <div class="promo-content">
+                  <h3 class="promo-title">Combo Amigos</h3>
+                  <div class="promo-list">
+                    <p class="promo-description">2 Hamburgueres Especiais</p>
+                    <p class="promo-description">2 Bebidas 500ml</p>
+                    <p class="promo-description">1 Porção Grande de Batata</p>
+                    <p class="promo-description">2 Molhos da Casa</p>
+                  </div>
+                  <div class="promo-footer">
+                    <span class="promo-price-old">R$ 89,90</span>
+                    <span class="promo-price-new">R$ 69,90</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-button-next text-red-600"></div>
+          <div class="swiper-button-prev text-red-600"></div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-20 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16" data-aos="fade-up">
+          Nosso Menu
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Menu Item 1 -->
+          <div
+            class="menu-item bg-white rounded-lg shadow-lg overflow-hidden"
+            data-aos="fade-up"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800"
+              alt="Classic Burger"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Classic Burger</h3>
+              <p class="text-gray-600 mb-4">
+                Hamburguer artesanal, queijo cheddar, alface, tomate e molho
+                especial
+              </p>
+              <p class="text-2xl font-bold text-red-600">R$ 32,90</p>
+            </div>
+          </div>
+
+          <!-- Menu Item 2 -->
+          <div
+            class="menu-item bg-white rounded-lg shadow-lg overflow-hidden"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1553979459-d2229ba7433b?q=80&w=800"
+              alt="Cheese Lover"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Cheese Lover</h3>
+              <p class="text-gray-600 mb-4">
+                Duplo hamburguer, triplo queijo, cebola caramelizada
+              </p>
+              <p class="text-2xl font-bold text-red-600">R$ 38,90</p>
+            </div>
+          </div>
+
+          <!-- Menu Item 3 -->
+          <div
+            class="menu-item bg-white rounded-lg shadow-lg overflow-hidden"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=800"
+              alt="Veggie Supreme"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6">
+              <h3 class="text-xl font-bold mb-2">Veggie Supreme</h3>
+              <p class="text-gray-600 mb-4">
+                Hamburguer vegetal, queijo vegano, rúcula e tomate seco
+              </p>
+              <p class="text-2xl font-bold text-red-600">R$ 34,90</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Delivery Section -->
+    <section id="delivery" class="py-20 bg-red-50">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16" data-aos="fade-up">
+          Faça seu Pedido
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-white p-8 rounded-lg shadow-lg" data-aos="fade-right">
+            <h3 class="text-2xl font-bold mb-6">Delivery Rápido</h3>
+            <form id="delivery-form" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">
+                  Seu Endereço
+                </label>
+                <input
+                  type="text"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">
+                  Complemento
+                </label>
+                <input
+                  type="text"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">
+                  Telefone
+                </label>
+                <input
+                  type="tel"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+                />
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+              >
+                Calcular Taxa de Entrega
+              </button>
+            </form>
+          </div>
+          <div class="bg-white p-8 rounded-lg shadow-lg" data-aos="fade-left">
+            <h3 class="text-2xl font-bold mb-6">Horário de Funcionamento</h3>
+            <div class="space-y-4">
+              <div class="flex justify-between">
+                <span>Segunda a Sexta</span>
+                <span>11h às 23h</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Sábado</span>
+                <span>11h às 00h</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Domingo</span>
+                <span>11h às 22h</span>
+              </div>
+            </div>
+            <div class="mt-8">
+              <h4 class="font-bold mb-4">Área de Entrega</h4>
+              <div class="map-container">
+                <div id="map"></div>
+              </div>
+              <div class="delivery-radius-info">
+                <p>
+                  <span class="radius-dot free"></span> Entrega Grátis até 3km
+                </p>
+                <p>
+                  <span class="radius-dot paid"></span> Taxa de entrega até 7km
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Avaliações Section -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16" data-aos="fade-up">
+          O que dizem nossos clientes
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="bg-gray-50 p-6 rounded-lg shadow" data-aos="fade-up">
+            <div class="flex items-center mb-4">
+              <img
+                src="https://api.dicebear.com/7.x/avataaars/svg?seed=1"
+                alt="Avatar"
+                class="w-12 h-12 rounded-full"
+              />
+              <div class="ml-4">
+                <h4 class="font-bold">João Silva</h4>
+                <div class="flex text-yellow-400">★★★★★</div>
+              </div>
+            </div>
+            <p class="text-gray-600">
+              "Melhor hamburguer que já comi! O atendimento é excelente e a
+              entrega super rápida."
+            </p>
+          </div>
+          <div
+            class="bg-gray-50 p-6 rounded-lg shadow"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div class="flex items-center mb-4">
+              <img
+                src="https://api.dicebear.com/7.x/avataaars/svg?seed=2"
+                alt="Avatar"
+                class="w-12 h-12 rounded-full"
+              />
+              <div class="ml-4">
+                <h4 class="font-bold">Maria Santos</h4>
+                <div class="flex text-yellow-400">★★★★★</div>
+              </div>
+            </div>
+            <p class="text-gray-600">
+              "Os ingredientes são sempre frescos e o hamburguer é suculento.
+              Recomendo!"
+            </p>
+          </div>
+          <div
+            class="bg-gray-50 p-6 rounded-lg shadow"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div class="flex items-center mb-4">
+              <img
+                src="https://api.dicebear.com/7.x/avataaars/svg?seed=3"
+                alt="Avatar"
+                class="w-12 h-12 rounded-full"
+              />
+              <div class="ml-4">
+                <h4 class="font-bold">Pedro Oliveira</h4>
+                <div class="flex text-yellow-400">★★★★★</div>
+              </div>
+            </div>
+            <p class="text-gray-600">
+              "O Cheese Lover é simplesmente incrível! Não tem igual na cidade."
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre Section -->
+    <section id="sobre" class="py-20 bg-gray-100">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row items-center gap-12">
+          <div class="md:w-1/2" data-aos="fade-right">
+            <img
+              src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1000"
+              alt="Nossa História"
+              class="rounded-lg shadow-lg"
+            />
+          </div>
+          <div class="md:w-1/2" data-aos="fade-left">
+            <h2 class="text-4xl font-bold mb-6">Nossa História</h2>
+            <p class="text-gray-600 mb-6">
+              Desde 2010, a Burger House tem se dedicado a criar as melhores
+              experiências gastronômicas para nossos clientes. Nossa paixão por
+              hamburgueres artesanais nos levou a desenvolver receitas únicas e
+              memoráveis.
+            </p>
+            <p class="text-gray-600 mb-6">
+              Utilizamos apenas ingredientes frescos e de alta qualidade,
+              selecionados cuidadosamente para garantir o sabor incomparável de
+              nossos hamburgueres.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contato Section -->
+    <section id="contato" class="py-20 bg-white">
+      <div class="container mx-auto px-4">
+        <h2 class="text-4xl font-bold text-center mb-16" data-aos="fade-up">
+          Entre em Contato
+        </h2>
+        <div class="max-w-3xl mx-auto">
+          <form class="space-y-6" data-aos="fade-up">
+            <div>
+              <label
+                for="nome"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Nome</label
+              >
+              <input
+                type="text"
+                id="nome"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="email"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="email"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="mensagem"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Mensagem</label
+              >
+              <textarea
+                id="mensagem"
+                rows="4"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
+                required
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              class="w-full text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-all duration-300"
+            >
+              Enviar Mensagem
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-center md:text-left mb-4 md:mb-0">
+            <h3 class="text-2xl font-bold">Burger House</h3>
+            <p class="mt-2">Os melhores hamburgueres artesanais</p>
+          </div>
+          <div class="text-center md:text-right">
+            <p>Rua dos Hamburgueres, 123</p>
+            <p>Tel: (11) 99999-9999</p>
+            <p>contato@burgerhouse.com.br</p>
+          </div>
+        </div>
+        <div class="text-center mt-8">
+          <p>&copy; 2024 Burger House. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- WhatsApp Button -->
+    <a
+      href="https://wa.me/5511999999999"
+      target="_blank"
+      class="floating-whatsapp"
+    >
+      <button
+        class="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"
+          />
+        </svg>
+      </button>
+    </a>
+
+    <!-- Scripts -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+      AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100,
+      });
+
+      new Swiper('.promoSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+          delay: 3000,
+          disableOnInteraction: false,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 1,
+          },
+          768: {
+            slidesPerView: 2,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+        },
+      });
+
+      function scrollToSection(sectionId) {
+        document
+          .getElementById(sectionId)
+          .scrollIntoView({ behavior: 'smooth' });
+      }
+
+      // Menu Mobile Toggle
+      const menuButton = document.querySelector(
+        '[data-collapse-toggle="navbar-default"]',
+      );
+      const menuContent = document.getElementById('navbar-default');
+
+      menuButton.addEventListener('click', () => {
+        menuContent.classList.toggle('hidden');
+      });
+
+      // Form Submission
+      document
+        .getElementById('delivery-form')
+        .addEventListener('submit', function (e) {
+          e.preventDefault();
+          alert(
+            'Calculando taxa de entrega... Em breve entraremos em contato!',
+          );
+        });
+
+      // Smooth Scroll para todos os links do menu
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth',
+          });
+        });
+      });
+
+      // Inicialização do Mapa
+      window.addEventListener('load', function () {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+
+        const map = L.map('map', {
+          center: [-23.55052, -46.633308],
+          zoom: 13,
+          zoomControl: true,
+          scrollWheelZoom: true,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap contributors',
+        }).addTo(map);
+
+        // Adiciona marcador da localização do restaurante
+        const restaurantMarker = L.marker([-23.55052, -46.633308])
+          .addTo(map)
+          .bindPopup('Burger House - Matriz')
+          .openPopup();
+
+        // Adiciona círculos de raio de entrega
+        const freeDeliveryCircle = L.circle([-23.55052, -46.633308], {
+          color: '#22c55e',
+          fillColor: '#22c55e',
+          fillOpacity: 0.1,
+          radius: 3000,
+        }).addTo(map);
+
+        const paidDeliveryCircle = L.circle([-23.55052, -46.633308], {
+          color: '#eab308',
+          fillColor: '#eab308',
+          fillOpacity: 0.1,
+          radius: 7000,
+        }).addTo(map);
+
+        // Força o recarregamento do mapa
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 100);
+      });
+    </script>
+  </body>
+</html>
